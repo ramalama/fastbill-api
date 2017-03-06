@@ -4,7 +4,7 @@ namespace FastBill\Model;
 
 class Expense extends AbstractModel
 {
-    protected static $xmlProperties = array(
+    protected static $xmlProperties = [
         'ORGANIZATION' => 'organization',
 
         'INVOICE_DATE' => 'invoiceDate',
@@ -18,5 +18,5 @@ class Expense extends AbstractModel
         'SUB_TOTAL' => 'subTotal',
         'VAT_TOTAL' => 'vatTotal',
         'TOTAL' => 'total'
-    );
+    ];
 }

@@ -15,7 +15,7 @@ class Customer extends AbstractModel
     const PAYMENT_CREDITCARD = 6;   //Kreditkarte
     const PAYMENT_CREDIT_CARD = 6;   //Kreditkarte
 
-    protected static $xmlProperties = array(
+    protected static $xmlProperties = [
         'CUSTOMER_ID' => 'customerId',
         'CUSTOMER_NUMBER' => 'customerNumber',
         'CUSTOMER_EXT_UID' => 'customerExtUid',
@@ -54,5 +54,5 @@ class Customer extends AbstractModel
         'BANK_CODE' => 'bankCode',
         'BANK_ACCOUNT_NUMBER' => 'bankAccountNumber',
         'BANK_ACCOUNT_OWNER' => 'bankAccountOwner'
-    );
+    ];
 }

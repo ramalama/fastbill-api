@@ -14,9 +14,13 @@ abstract class AbstractFastBillClient extends AbstractClient
 {
     protected $apiKey, $email;
 
-    public function __construct(ClientInterface $guzzleClient, array $options)
+    /**
+     * @param ClientInterface $httpClient
+     * @param array $options
+     */
+    public function __construct(ClientInterface $httpClient, array $options)
     {
-        parent::__construct($guzzleClient);
+        parent::__construct($httpClient);
 
         if (!array_key_exists('apiKey', $options) || empty($options['apiKey'])) {
             throw new InvalidArgumentException("the key: 'apiKey' has to be set on options");
@@ -31,14 +35,15 @@ abstract class AbstractFastBillClient extends AbstractClient
     }
 
     /**
-     * @return FastBill\Model\Invoice
+     * @param Invoice $invoice
+     * @return Invoice
      */
     public function createInvoice(Invoice $invoice)
     {
-        $requestBody = array(
+        $requestBody = [
             'SERVICE' => 'invoice.create',
             'DATA' => $invoice->serializeJSONXML()
-        );
+        ];
 
         $jsonResponse = $this->validateResponse(
             $this->dispatchRequest(
@@ -61,14 +66,15 @@ abstract class AbstractFastBillClient extends AbstractClient
      *
      * the object as parameter is returned as result but the new id will be set (or overridden)
      *
-     * @return FastBill\Model\Customer
+     * @param Customer $customer
+     * @return \FastBill\Model\Customer
      */
     public function createCustomer(Customer $customer)
     {
-        $requestBody = array(
+        $requestBody = [
             'SERVICE' => 'customer.create',
             'DATA' => $customer->serializeJSONXML()
-        );
+        ];
 
         $jsonResponse = $this->validateResponse(
             $this->dispatchRequest(
@@ -211,13 +217,10 @@ abstract class AbstractFastBillClient extends AbstractClient
         return '/api/1.0/api.php';
     }
 
-    protected function initRequest(GuzzleRequest $request)
-    {
-        $request->setAuth($this->email, $this->apiKey);
-    }
-
     /**
-     * @returns the whole response including REQUEST and RESPONSE keys
+     * @param \stdClass $jsonResponse
+     * @param callable $validateResponse
+     * @return the whole response including REQUEST and RESPONSE keys
      */
     protected function validateResponse(\stdClass $jsonResponse, \Closure $validateResponse)
     {

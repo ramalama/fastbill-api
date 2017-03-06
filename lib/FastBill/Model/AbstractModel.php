@@ -19,7 +19,7 @@ abstract class AbstractModel
 
     protected $collections = [];
 
-    protected function __construct(Array $properties)
+    protected function __construct(array $properties)
     {
         $this->properties = $this->readProperties($properties);
 
@@ -27,7 +27,7 @@ abstract class AbstractModel
         $this->name = array_pop($parts);
     }
 
-    protected function readProperties(Array $properties)
+    protected function readProperties(array $properties)
     {
         foreach ($this->collections as $propertyName => $fqn) {
             $collection = [];
@@ -49,7 +49,7 @@ abstract class AbstractModel
         return array_key_exists($propertyName, $this->collections);
     }
 
-    public static function fromArray(Array $properties)
+    public static function fromArray(array $properties)
     {
         $propertyNames = array_values(static::$xmlProperties);
 

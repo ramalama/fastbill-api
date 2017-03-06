@@ -4,7 +4,7 @@ namespace FastBill\Model;
 
 class Project extends AbstractModel
 {
-    protected static $xmlProperties = array(
+    protected static $xmlProperties = [
         'PROJECT_ID' => 'projectId',
         'PROJECT_NAME' => 'projectName',
         'CUSTOMER_ID' => 'customerId',
@@ -14,5 +14,5 @@ class Project extends AbstractModel
         'VAT_PERCENT' => 'vatPercent',
         'START_DATE' => 'startDate',
         'END_DATE' => 'endDate'
-    );
+    ];
 }
