@@ -2,14 +2,15 @@
 
 namespace FastBill\Api;
 
-use Guzzle\HTTP\Client as GuzzleClient;
-
 class MyFastBillClient extends AbstractFastBillClient
 {
-    public static function create(Array $options)
+    public static function create(array $options)
     {
         return new static(
-            new GuzzleClient("https://my.fastbill.com/"),
+            new \GuzzleHttp\Client([
+                'base_uri' => "https://my.fastbill.com/",
+                'headers' => ['Content-Type' => 'application/json']
+            ]),
             $options
         );
     }

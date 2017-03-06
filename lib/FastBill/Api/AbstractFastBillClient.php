@@ -3,20 +3,18 @@
 namespace FastBill\Api;
 
 use FastBill\Model\Customer;
+use FastBill\Model\Expense;
 use FastBill\Model\Invoice;
 use FastBill\Model\Project;
-use FastBill\Model\Expense;
-use Guzzle\HTTP\Message\Request as GuzzleRequest;
-use Guzzle\HTTP\Client as GuzzleClient;
+use GuzzleHttp\ClientInterface;
 use InvalidArgumentException;
 use RuntimeException;
-use Webforge\Common\JS\JSONConverter;
 
 abstract class AbstractFastBillClient extends AbstractClient
 {
     protected $apiKey, $email;
 
-    public function __construct(GuzzleClient $guzzleClient, Array $options)
+    public function __construct(ClientInterface $guzzleClient, array $options)
     {
         parent::__construct($guzzleClient);
 
@@ -30,7 +28,6 @@ abstract class AbstractFastBillClient extends AbstractClient
 
         $this->apiKey = $options['apiKey'];
         $this->email = $options['email'];
-        $this->guzzle->setDefaultOption('headers', array('Content-Type' => 'application/json'));
     }
 
     /**
@@ -89,7 +86,7 @@ abstract class AbstractFastBillClient extends AbstractClient
         return $customer;
     }
 
-    public function getCustomers(Array $filters = array(), Array $props = array())
+    public function getCustomers(array $filters = [], array $props = [])
     {
         $requestBody = $this->createRequestBody('customer.get', $filters, $props);
 
@@ -104,7 +101,7 @@ abstract class AbstractFastBillClient extends AbstractClient
             }
         );
 
-        $customers = array();
+        $customers = [];
         foreach ($jsonResponse->RESPONSE->CUSTOMERS as $xmlCustomer) {
             $customers[] = Customer::fromObject($xmlCustomer);
         }
@@ -112,7 +109,7 @@ abstract class AbstractFastBillClient extends AbstractClient
         return $customers;
     }
 
-    protected function filtersToXml(Array $filters, \stdClass $requestBody)
+    protected function filtersToXml(array $filters, \stdClass $requestBody)
     {
         foreach ($filters as $name => $value) {
             if (!empty($value)) {
@@ -125,7 +122,7 @@ abstract class AbstractFastBillClient extends AbstractClient
         }
     }
 
-    protected function createRequestBody($service, Array $filters = array(), Array $props = array())
+    protected function createRequestBody($service, array $filters = [], array $props = [])
     {
         $props['service'] = $service;
 
@@ -140,7 +137,7 @@ abstract class AbstractFastBillClient extends AbstractClient
         return $requestBody;
     }
 
-    public function getInvoices(Array $filters = array(), Array $props = array())
+    public function getInvoices(array $filters = [], array $props = [])
     {
         $requestBody = $this->createRequestBody('invoice.get', $filters, $props);
 
@@ -155,7 +152,7 @@ abstract class AbstractFastBillClient extends AbstractClient
             }
         );
 
-        $invoices = array();
+        $invoices = [];
         foreach ($jsonResponse->RESPONSE->INVOICES as $xmlInvoice) {
             $invoices[] = Invoice::fromObject($xmlInvoice);
         }
@@ -163,7 +160,7 @@ abstract class AbstractFastBillClient extends AbstractClient
         return $invoices;
     }
 
-    public function getProjects(Array $filters = array(), Array $props = array())
+    public function getProjects(array $filters = [], array $props = [])
     {
         $requestBody = $this->createRequestBody('project.get', $filters, $props);
 
@@ -178,7 +175,7 @@ abstract class AbstractFastBillClient extends AbstractClient
             }
         );
 
-        $projects = array();
+        $projects = [];
         foreach ($jsonResponse->RESPONSE->PROJECTS as $xmlProject) {
             $projects[] = Project::fromObject($xmlProject);
         }
@@ -186,7 +183,7 @@ abstract class AbstractFastBillClient extends AbstractClient
         return $projects;
     }
 
-    public function getExpenses(Array $filters = array(), Array $props = array())
+    public function getExpenses(array $filters = [], array $props = [])
     {
         $requestBody = $this->createRequestBody('expense.get', $filters, $props);
 
@@ -201,7 +198,7 @@ abstract class AbstractFastBillClient extends AbstractClient
             }
         );
 
-        $expenses = array();
+        $expenses = [];
         foreach ($jsonResponse->RESPONSE->EXPENSES as $xml) {
             $expenses[] = Expense::fromObject($xml);
         }
@@ -220,14 +217,15 @@ abstract class AbstractFastBillClient extends AbstractClient
     }
 
     /**
-     * @returns the whole response including REQUEST and RESPONSE ekys
+     * @returns the whole response including REQUEST and RESPONSE keys
      */
     protected function validateResponse(\stdClass $jsonResponse, \Closure $validateResponse)
     {
-        $stringified = JSONConverter::create()->stringify($jsonResponse, JSONConverter::PRETTY_PRINT);
+        //$stringified = JSONConverter::create()->stringify($jsonResponse, JSONConverter::PRETTY_PRINT);
 
         if (!isset($jsonResponse->RESPONSE)) {
-            throw new RuntimeException('The property response is expected in jsonResponse. Got: '.$stringified);
+            throw new RuntimeException('The property RESPONSE is expected in jsonResponse.');
+            //throw new RuntimeException('The property response is expected in jsonResponse. Got: '.$stringified);
         }
 
         $msg = null;

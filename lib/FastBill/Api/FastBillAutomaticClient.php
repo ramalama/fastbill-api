@@ -4,11 +4,11 @@ namespace FastBill\Api;
 
 use FastBill\Model\Article;
 use FastBill\Model\Subscription;
-use Guzzle\HTTP\Client as GuzzleClient;
+use GuzzleHttp\ClientInterface;
 
 class FastBillAutomaticClient extends AbstractFastBillClient
 {
-    public function __construct(GuzzleClient $guzzleClient, Array $options)
+    public function __construct(ClientInterface $guzzleClient, Array $options)
     {
         $guzzleClient->setBaseUrl("https://automatic.fastbill.com/");
         parent::__construct($guzzleClient, $options);
@@ -114,7 +114,7 @@ class FastBillAutomaticClient extends AbstractFastBillClient
         return $subscription;
     }
 
-    public function getSubscriptions(Array $filters = array())
+    public function getSubscriptions(Array $filters = [])
     {
         $requestBody = (object) array(
             'SERVICE' => 'subscription.get'
@@ -133,7 +133,7 @@ class FastBillAutomaticClient extends AbstractFastBillClient
             }
         );
 
-        $subscriptions = array();
+        $subscriptions = [];
         foreach ($jsonResponse->RESPONSE->SUBSCRIPTIONS as $xmlSubscription) {
             $subscriptions[] = Subscription::fromObject($xmlSubscription);
         }
@@ -141,7 +141,7 @@ class FastBillAutomaticClient extends AbstractFastBillClient
         return $subscriptions;
     }
 
-    public function getArticles(Array $filters = array())
+    public function getArticles(Array $filters = [])
     {
         $requestBody = (object) array(
             'SERVICE' => 'article.get'
@@ -160,7 +160,7 @@ class FastBillAutomaticClient extends AbstractFastBillClient
             }
         );
 
-        $articles = array();
+        $articles = [];
         foreach ($jsonResponse->RESPONSE->ARTICLES as $xmlSubscription) {
             $articles[] = Article::fromObject($xmlSubscription);
         }
