@@ -7,6 +7,7 @@ class Expense extends AbstractModel
     protected static $xmlProperties = [
         'ORGANIZATION' => 'organization',
 
+        'INVOICE_ID' => 'invoiceId',
         'INVOICE_DATE' => 'invoiceDate',
         'INVOICE_NUMBER' => 'invoiceNumber',
         'DUE_DATE' => 'dueDate',
