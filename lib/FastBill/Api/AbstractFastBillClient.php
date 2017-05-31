@@ -61,6 +61,27 @@ abstract class AbstractFastBillClient extends AbstractClient
         return $invoice;
     }
 
+    public function completeInvoice($invoiceId)
+    {
+        $requestBody = [
+            'SERVICE' => 'invoice.complete',
+            'DATA' => $invoiceId
+        ];
+
+        $jsonResponse = $this->validateResponse(
+            $this->dispatchRequest(
+                $this->createRequest('POST', '/', $requestBody)
+            ),
+            function ($response, &$msg) {
+                $msg = 'STATUS is not equal to success';
+
+                return isset($response->STATUS) && $response->STATUS === 'success';
+            }
+        );
+
+        return $jsonResponse->RESPONSE->INVOICE_NUMBER;
+    }
+
     /**
      * Creates a customer (not matter if it exists)
      *

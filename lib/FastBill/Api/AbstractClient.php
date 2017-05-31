@@ -35,7 +35,7 @@ abstract class AbstractClient
             }
         }
 
-        $response = $this->guzzle->$method($this->expandurl($relativeResource), [
+        $response = $this->guzzle->request($method, $this->expandurl($relativeResource), [
             'auth' => [
                 $this->email,
                 $this->apiKey

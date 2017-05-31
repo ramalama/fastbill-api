@@ -47,7 +47,8 @@ class Invoice extends AbstractModel
 
         'SUB_TOTAL' => 'subTotal',
         'VAT_TOTAL' => 'vatTotal',
-        'TOTAL' => 'total'
+        'TOTAL' => 'total',
+        'EU_DELIVERY' => 'euDelivery',
     ];
 
     protected $collections = array('items' => 'FastBill\Model\InvoiceItem');
