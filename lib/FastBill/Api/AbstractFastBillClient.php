@@ -65,7 +65,7 @@ abstract class AbstractFastBillClient extends AbstractClient
     {
         $requestBody = [
             'SERVICE' => 'invoice.complete',
-            'DATA' => $invoiceId
+            'DATA' => ['INVOICE_ID' => $invoiceId]
         ];
 
         $jsonResponse = $this->validateResponse(
