@@ -2,8 +2,8 @@
   "name": "webforge/fastbill-api",
   "authors": [
     {
-      "name": "Philipp Scheit",
-      "email": "p.scheit@ps-webforge.com"
+      "name": "Fabio Bacigalupo",
+      "email": "f.bacigalupo@open-haus.de"
     }
   ],
   "license": "MIT",
@@ -28,7 +28,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-master": "1.0.x-dev"
+      "dev-master": "1.0.*@dev"
     }
   }
 }
