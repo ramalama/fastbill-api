@@ -82,6 +82,27 @@ abstract class AbstractFastBillClient extends AbstractClient
         return $jsonResponse->RESPONSE->INVOICE_NUMBER;
     }
 
+    public function sendByEmail($invoiceId, array $recipients)
+    {
+        $requestBody = [
+            'SERVICE' => 'invoice.sendbyemail',
+            'DATA' => ['INVOICE_ID' => $invoiceId, 'RECIPIENT' => $recipients]
+        ];
+
+        $jsonResponse = $this->validateResponse(
+            $this->dispatchRequest(
+                $this->createRequest('POST', '/', $requestBody)
+            ),
+            function ($response, &$msg) {
+                $msg = 'STATUS is not equal to success';
+
+                return isset($response->STATUS) && $response->STATUS === 'success';
+            }
+        );
+
+        return true;
+    }
+
     /**
      * Creates a customer (not matter if it exists)
      *
