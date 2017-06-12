@@ -6,6 +6,7 @@ class Contact extends AbstractModel
 {
     protected static $xmlProperties = [
         'CUSTOMER_ID' => 'customerId',
+        'CONTACT_ID' => 'contactId',
         'ORGANIZATION' => 'organization', // Firmenname [REQUIRED] wenn CUSTOMER_TYPE = business
         'POSITION' => 'position',
         'SALUTATION' => 'salutation',
