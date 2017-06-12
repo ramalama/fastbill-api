@@ -51,5 +51,5 @@ class Invoice extends AbstractModel
         'EU_DELIVERY' => 'euDelivery',
     ];
 
-    protected $collections = array('items' => 'FastBill\Model\InvoiceItem');
+    protected $collections = ['items' => 'FastBill\Model\InvoiceItem'];
 }

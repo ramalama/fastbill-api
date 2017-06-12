@@ -2,6 +2,7 @@
 
 namespace FastBill\Api;
 
+use FastBill\Model\Contact;
 use FastBill\Model\Customer;
 use FastBill\Model\Expense;
 use FastBill\Model\Invoice;
@@ -155,6 +156,52 @@ abstract class AbstractFastBillClient extends AbstractClient
         }
 
         return $customers;
+    }
+
+    public function createContact(Contact $contact)
+    {
+        $requestBody = [
+            'SERVICE' => 'contact.create',
+            'DATA' => $contact->serializeJSONXML()
+        ];
+
+        $jsonResponse = $this->validateResponse(
+            $this->dispatchRequest(
+                $this->createRequest('POST', '/', $requestBody)
+            ),
+            function ($response, &$msg) {
+                $msg = 'key STATUS is not equal to success';
+
+                return isset($response->STATUS) && $response->STATUS === 'success';
+            }
+        );
+
+        $contact->setContactId($jsonResponse->RESPONSE->CONTACT_ID);
+
+        return $contact;
+    }
+
+    public function getContacts(array $filters = [], array $props = [])
+    {
+        $requestBody = $this->createRequestBody('contact.get', $filters, $props);
+
+        $jsonResponse = $this->validateResponse(
+            $this->dispatchRequest(
+                $this->createRequest('POST', '/', $requestBody)
+            ),
+            function ($response, &$msg) {
+                $msg = 'key CONTACTS is not set';
+
+                return isset($response->CONTACTS);
+            }
+        );
+
+        $contacts = [];
+        foreach ($jsonResponse->RESPONSE->CONTACTS as $xmlContact) {
+            $contacts[] = Contact::fromObject($xmlContact);
+        }
+
+        return $contacts;
     }
 
     protected function filtersToXml(array $filters, \stdClass $requestBody)
