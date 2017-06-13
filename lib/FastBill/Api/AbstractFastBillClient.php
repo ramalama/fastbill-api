@@ -135,6 +135,27 @@ abstract class AbstractFastBillClient extends AbstractClient
         return $customer;
     }
 
+    public function updateCustomer(Customer $customer)
+    {
+        $requestBody = [
+            'SERVICE' => 'customer.update',
+            'DATA' => $customer->serializeJSONXML()
+        ];
+
+        $jsonResponse = $this->validateResponse(
+            $this->dispatchRequest(
+                $this->createRequest('POST', '/', $requestBody)
+            ),
+            function ($response, &$msg) {
+                $msg = 'key STATUS is not equal to success';
+
+                return isset($response->STATUS) && $response->STATUS === 'success';
+            }
+        );
+
+        return $customer;
+    }
+
     public function getCustomers(array $filters = [], array $props = [])
     {
         $requestBody = $this->createRequestBody('customer.get', $filters, $props);
