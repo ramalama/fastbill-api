@@ -4,7 +4,7 @@ namespace FastBill\Model;
 
 class InvoiceItem extends AbstractModel
 {
-    protected static $xmlProperties = array(
+    protected static $xmlProperties = [
         'INVOICE_ITEM_ID' => 'invoiceItemId',
         'ARTICLE_NUMBER' => 'articleNumber',
         'DESCRIPTION' => 'description',
@@ -17,5 +17,5 @@ class InvoiceItem extends AbstractModel
         'COMPLETE_NET' => 'completeNet',
         'COMPLETE_GROSS' => 'completeGross',
         'SORT_ORDER' => 'sortOrder'
-    );
+    ];
 }

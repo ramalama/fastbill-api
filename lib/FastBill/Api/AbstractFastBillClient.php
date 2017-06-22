@@ -2,23 +2,26 @@
 
 namespace FastBill\Api;
 
+use FastBill\Model\Contact;
 use FastBill\Model\Customer;
+use FastBill\Model\Expense;
 use FastBill\Model\Invoice;
 use FastBill\Model\Project;
-use FastBill\Model\Expense;
-use Guzzle\HTTP\Message\Request as GuzzleRequest;
-use Guzzle\HTTP\Client as GuzzleClient;
+use GuzzleHttp\ClientInterface;
 use InvalidArgumentException;
 use RuntimeException;
-use Webforge\Common\JS\JSONConverter;
 
 abstract class AbstractFastBillClient extends AbstractClient
 {
     protected $apiKey, $email;
 
-    public function __construct(GuzzleClient $guzzleClient, Array $options)
+    /**
+     * @param ClientInterface $httpClient
+     * @param array $options
+     */
+    public function __construct(ClientInterface $httpClient, array $options)
     {
-        parent::__construct($guzzleClient);
+        parent::__construct($httpClient);
 
         if (!array_key_exists('apiKey', $options) || empty($options['apiKey'])) {
             throw new InvalidArgumentException("the key: 'apiKey' has to be set on options");
@@ -30,7 +33,6 @@ abstract class AbstractFastBillClient extends AbstractClient
 
         $this->apiKey = $options['apiKey'];
         $this->email = $options['email'];
-        $this->guzzle->setDefaultOption('headers', array('Content-Type' => 'application/json'));
     }
 
     /**
@@ -60,14 +62,15 @@ abstract class AbstractFastBillClient extends AbstractClient
     }
 
     /**
-     * @return FastBill\Model\Invoice
+     * @param Invoice $invoice
+     * @return Invoice
      */
     public function createInvoice(Invoice $invoice)
     {
-        $requestBody = array(
+        $requestBody = [
             'SERVICE' => 'invoice.create',
             'DATA' => $invoice->serializeJSONXML()
-        );
+        ];
 
         $jsonResponse = $this->validateResponse(
             $this->dispatchRequest(
@@ -85,19 +88,62 @@ abstract class AbstractFastBillClient extends AbstractClient
         return $invoice;
     }
 
+    public function completeInvoice($invoiceId)
+    {
+        $requestBody = [
+            'SERVICE' => 'invoice.complete',
+            'DATA' => ['INVOICE_ID' => $invoiceId]
+        ];
+
+        $jsonResponse = $this->validateResponse(
+            $this->dispatchRequest(
+                $this->createRequest('POST', '/', $requestBody)
+            ),
+            function ($response, &$msg) {
+                $msg = 'STATUS is not equal to success';
+
+                return isset($response->STATUS) && $response->STATUS === 'success';
+            }
+        );
+
+        return $jsonResponse->RESPONSE->INVOICE_NUMBER;
+    }
+
+    public function sendByEmail($invoiceId, array $recipients)
+    {
+        $requestBody = [
+            'SERVICE' => 'invoice.sendbyemail',
+            'DATA' => ['INVOICE_ID' => $invoiceId, 'RECIPIENT' => $recipients]
+        ];
+
+        $jsonResponse = $this->validateResponse(
+            $this->dispatchRequest(
+                $this->createRequest('POST', '/', $requestBody)
+            ),
+            function ($response, &$msg) {
+                $msg = 'STATUS is not equal to success';
+
+                return isset($response->STATUS) && $response->STATUS === 'success';
+            }
+        );
+
+        return true;
+    }
+
     /**
      * Creates a customer (not matter if it exists)
      *
      * the object as parameter is returned as result but the new id will be set (or overridden)
      *
-     * @return FastBill\Model\Customer
+     * @param Customer $customer
+     * @return \FastBill\Model\Customer
      */
     public function createCustomer(Customer $customer)
     {
-        $requestBody = array(
+        $requestBody = [
             'SERVICE' => 'customer.create',
             'DATA' => $customer->serializeJSONXML()
-        );
+        ];
 
         $jsonResponse = $this->validateResponse(
             $this->dispatchRequest(
@@ -115,7 +161,28 @@ abstract class AbstractFastBillClient extends AbstractClient
         return $customer;
     }
 
-    public function getCustomers(Array $filters = array(), Array $props = array())
+    public function updateCustomer(Customer $customer)
+    {
+        $requestBody = [
+            'SERVICE' => 'customer.update',
+            'DATA' => $customer->serializeJSONXML()
+        ];
+
+        $jsonResponse = $this->validateResponse(
+            $this->dispatchRequest(
+                $this->createRequest('POST', '/', $requestBody)
+            ),
+            function ($response, &$msg) {
+                $msg = 'key STATUS is not equal to success';
+
+                return isset($response->STATUS) && $response->STATUS === 'success';
+            }
+        );
+
+        return $customer;
+    }
+
+    public function getCustomers(array $filters = [], array $props = [])
     {
         $requestBody = $this->createRequestBody('customer.get', $filters, $props);
 
@@ -130,7 +197,7 @@ abstract class AbstractFastBillClient extends AbstractClient
             }
         );
 
-        $customers = array();
+        $customers = [];
         foreach ($jsonResponse->RESPONSE->CUSTOMERS as $xmlCustomer) {
             $customers[] = Customer::fromObject($xmlCustomer);
         }
@@ -138,7 +205,74 @@ abstract class AbstractFastBillClient extends AbstractClient
         return $customers;
     }
 
-    protected function filtersToXml(Array $filters, \stdClass $requestBody)
+    public function createContact(Contact $contact)
+    {
+        $requestBody = [
+            'SERVICE' => 'contact.create',
+            'DATA' => $contact->serializeJSONXML()
+        ];
+
+        $jsonResponse = $this->validateResponse(
+            $this->dispatchRequest(
+                $this->createRequest('POST', '/', $requestBody)
+            ),
+            function ($response, &$msg) {
+                $msg = 'key STATUS is not equal to success';
+
+                return isset($response->STATUS) && $response->STATUS === 'success';
+            }
+        );
+
+        $contact->setContactId($jsonResponse->RESPONSE->CONTACT_ID);
+
+        return $contact;
+    }
+
+    public function updateContact(Contact $contact)
+    {
+        $requestBody = [
+            'SERVICE' => 'contact.update',
+            'DATA' => $contact->serializeJSONXML()
+        ];
+
+        $jsonResponse = $this->validateResponse(
+            $this->dispatchRequest(
+                $this->createRequest('POST', '/', $requestBody)
+            ),
+            function ($response, &$msg) {
+                $msg = 'key STATUS is not equal to success';
+
+                return isset($response->STATUS) && $response->STATUS === 'success';
+            }
+        );
+
+        return $contact;
+    }
+
+    public function getContacts(array $filters = [], array $props = [])
+    {
+        $requestBody = $this->createRequestBody('contact.get', $filters, $props);
+
+        $jsonResponse = $this->validateResponse(
+            $this->dispatchRequest(
+                $this->createRequest('POST', '/', $requestBody)
+            ),
+            function ($response, &$msg) {
+                $msg = 'key CONTACTS is not set';
+
+                return isset($response->CONTACTS);
+            }
+        );
+
+        $contacts = [];
+        foreach ($jsonResponse->RESPONSE->CONTACTS as $xmlContact) {
+            $contacts[] = Contact::fromObject($xmlContact);
+        }
+
+        return $contacts;
+    }
+
+    protected function filtersToXml(array $filters, \stdClass $requestBody)
     {
         foreach ($filters as $name => $value) {
             if (!empty($value)) {
@@ -151,7 +285,7 @@ abstract class AbstractFastBillClient extends AbstractClient
         }
     }
 
-    protected function createRequestBody($service, Array $filters = array(), Array $props = array())
+    protected function createRequestBody($service, array $filters = [], array $props = [])
     {
         $props['service'] = $service;
 
@@ -166,7 +300,7 @@ abstract class AbstractFastBillClient extends AbstractClient
         return $requestBody;
     }
 
-    public function getInvoices(Array $filters = array(), Array $props = array())
+    public function getInvoices(array $filters = [], array $props = [])
     {
         $requestBody = $this->createRequestBody('invoice.get', $filters, $props);
 
@@ -181,7 +315,7 @@ abstract class AbstractFastBillClient extends AbstractClient
             }
         );
 
-        $invoices = array();
+        $invoices = [];
         foreach ($jsonResponse->RESPONSE->INVOICES as $xmlInvoice) {
             $invoices[] = Invoice::fromObject($xmlInvoice);
         }
@@ -189,7 +323,7 @@ abstract class AbstractFastBillClient extends AbstractClient
         return $invoices;
     }
 
-    public function getProjects(Array $filters = array(), Array $props = array())
+    public function getProjects(array $filters = [], array $props = [])
     {
         $requestBody = $this->createRequestBody('project.get', $filters, $props);
 
@@ -204,7 +338,7 @@ abstract class AbstractFastBillClient extends AbstractClient
             }
         );
 
-        $projects = array();
+        $projects = [];
         foreach ($jsonResponse->RESPONSE->PROJECTS as $xmlProject) {
             $projects[] = Project::fromObject($xmlProject);
         }
@@ -212,7 +346,7 @@ abstract class AbstractFastBillClient extends AbstractClient
         return $projects;
     }
 
-    public function getExpenses(Array $filters = array(), Array $props = array())
+    public function getExpenses(array $filters = [], array $props = [])
     {
         $requestBody = $this->createRequestBody('expense.get', $filters, $props);
 
@@ -227,7 +361,7 @@ abstract class AbstractFastBillClient extends AbstractClient
             }
         );
 
-        $expenses = array();
+        $expenses = [];
         foreach ($jsonResponse->RESPONSE->EXPENSES as $xml) {
             $expenses[] = Expense::fromObject($xml);
         }
@@ -240,21 +374,19 @@ abstract class AbstractFastBillClient extends AbstractClient
         return '/api/1.0/api.php';
     }
 
-    protected function initRequest(GuzzleRequest $request)
-    {
-        $request->setAuth($this->email, $this->apiKey);
-    }
-
     /**
-     * @returns the whole response including REQUEST and RESPONSE ekys
+     * @param \stdClass $jsonResponse
+     * @param callable $validateResponse
+     * @return the whole response including REQUEST and RESPONSE keys
      * @throws BadRequestException
      */
     protected function validateResponse(\stdClass $jsonResponse, \Closure $validateResponse)
     {
-        $stringified = JSONConverter::create()->stringify($jsonResponse, JSONConverter::PRETTY_PRINT);
+        //$stringified = JSONConverter::create()->stringify($jsonResponse, JSONConverter::PRETTY_PRINT);
 
         if (!isset($jsonResponse->RESPONSE)) {
-            throw new RuntimeException('The property response is expected in jsonResponse. Got: '.$stringified);
+            throw new RuntimeException('The property RESPONSE is expected in jsonResponse.');
+            //throw new RuntimeException('The property response is expected in jsonResponse. Got: '.$stringified);
         }
 
         $msg = null;

@@ -4,7 +4,7 @@ namespace FastBill\Api;
 
 class BadRequestException extends \RuntimeException
 {
-    protected $errors = array();
+    protected $errors = [];
 
     public static function fromResponse(\stdClass $jsonResponse)
     {

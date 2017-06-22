@@ -2,8 +2,8 @@
   "name": "webforge/fastbill-api",
   "authors": [
     {
-      "name": "Philipp Scheit",
-      "email": "p.scheit@ps-webforge.com"
+      "name": "Fabio Bacigalupo",
+      "email": "f.bacigalupo@open-haus.de"
     }
   ],
   "license": "MIT",
@@ -21,13 +21,10 @@
     }
   },
   "require": {
-    "beberlei/assert": "1.6@stable",
-    "webforge/common": ">=1.7.1",
-    "guzzle/guzzle": "3.7.*@stable"
+    "beberlei/assert": "^2.7",
+    "guzzlehttp/guzzle": "^6.2"
   },
   "require-dev": {
-    "webforge/testplate": "1.*",
-    "webforge/dom": "1.*@dev"
   },
   "extra": {
     "branch-alias": {

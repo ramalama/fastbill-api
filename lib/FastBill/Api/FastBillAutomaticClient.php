@@ -4,11 +4,11 @@ namespace FastBill\Api;
 
 use FastBill\Model\Article;
 use FastBill\Model\Subscription;
-use Guzzle\HTTP\Client as GuzzleClient;
+use GuzzleHttp\ClientInterface;
 
 class FastBillAutomaticClient extends AbstractFastBillClient
 {
-    public function __construct(GuzzleClient $guzzleClient, Array $options)
+    public function __construct(ClientInterface $guzzleClient, array $options)
     {
         $guzzleClient->setBaseUrl("https://automatic.fastbill.com/");
         parent::__construct($guzzleClient, $options);
@@ -19,10 +19,10 @@ class FastBillAutomaticClient extends AbstractFastBillClient
      */
     public function createSubscription(Subscription $subscription)
     {
-        $requestBody = array(
+        $requestBody = [
             'SERVICE' => 'subscription.create',
             'DATA' => $subscription->serializeJSONXML()
-        );
+        ];
 
         $jsonResponse = $this->validateResponse(
             $this->dispatchRequest(
@@ -45,10 +45,10 @@ class FastBillAutomaticClient extends AbstractFastBillClient
      */
     public function updateSubscription(Subscription $subscription)
     {
-        $requestBody = array(
+        $requestBody = [
             'SERVICE' => 'subscription.update',
             'DATA' => $subscription->serializeJSONXML()
-        );
+        ];
 
         $jsonResponse = $this->validateResponse(
             $this->dispatchRequest(
@@ -69,10 +69,10 @@ class FastBillAutomaticClient extends AbstractFastBillClient
      */
     public function cancelSubscription(Subscription $subscription)
     {
-        $requestBody = array(
+        $requestBody = [
             'SERVICE' => 'subscription.cancel',
             'DATA' => $subscription->serializeJSONXML()
-        );
+        ];
 
         $jsonResponse = $this->validateResponse(
             $this->dispatchRequest(
@@ -95,10 +95,10 @@ class FastBillAutomaticClient extends AbstractFastBillClient
      */
     public function reactivateSubscription(Subscription $subscription)
     {
-        $requestBody = array(
+        $requestBody = [
             'SERVICE' => 'subscription.reactivate',
             'DATA' => $subscription->serializeJSONXML()
-        );
+        ];
 
         $jsonResponse = $this->validateResponse(
             $this->dispatchRequest(
@@ -114,11 +114,11 @@ class FastBillAutomaticClient extends AbstractFastBillClient
         return $subscription;
     }
 
-    public function getSubscriptions(Array $filters = array())
+    public function getSubscriptions(array $filters = [])
     {
-        $requestBody = (object) array(
+        $requestBody = (object) [
             'SERVICE' => 'subscription.get'
-        );
+        ];
 
         $this->filtersToXml($filters, $requestBody);
 
@@ -133,7 +133,7 @@ class FastBillAutomaticClient extends AbstractFastBillClient
             }
         );
 
-        $subscriptions = array();
+        $subscriptions = [];
         foreach ($jsonResponse->RESPONSE->SUBSCRIPTIONS as $xmlSubscription) {
             $subscriptions[] = Subscription::fromObject($xmlSubscription);
         }
@@ -141,11 +141,11 @@ class FastBillAutomaticClient extends AbstractFastBillClient
         return $subscriptions;
     }
 
-    public function getArticles(Array $filters = array())
+    public function getArticles(array $filters = [])
     {
-        $requestBody = (object) array(
+        $requestBody = (object) [
             'SERVICE' => 'article.get'
-        );
+        ];
 
         $this->filtersToXml($filters, $requestBody);
 
@@ -160,7 +160,7 @@ class FastBillAutomaticClient extends AbstractFastBillClient
             }
         );
 
-        $articles = array();
+        $articles = [];
         foreach ($jsonResponse->RESPONSE->ARTICLES as $xmlSubscription) {
             $articles[] = Article::fromObject($xmlSubscription);
         }

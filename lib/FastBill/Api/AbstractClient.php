@@ -2,57 +2,48 @@
 
 namespace FastBill\Api;
 
-use Guzzle\HTTP\Client as GuzzleClient;
-use Guzzle\HTTP\Message\Request as GuzzleRequest;
+use GuzzleHttp\ClientInterface;
+use Psr\Http\Message\ResponseInterface;
 
 abstract class AbstractClient
 {
-    /**
-     * @var Guzzle\HTTP\Client
-     */
     protected $guzzle;
 
-    public function __construct(GuzzleClient $guzzle)
+    public function __construct(ClientInterface $guzzle)
     {
         $this->guzzle = $guzzle;
     }
 
     /**
-     * Sends the Guzzle Request to the server and returns the parsed result
+     * Parses und returns the response
      *
+     * @param ResponseInterface $response
      * @return mixed the result parsed
      */
-    public function dispatchRequest(GuzzleRequest $request)
+    public function dispatchRequest(ResponseInterface $response)
     {
-        $response = $request->send();
-
         return $this->parseJSON($json = (string) $response->getBody());
     }
 
-    /**
-     * @return Guzzle\HTTP\Message\Request
-     */
     public function createRequest($method, $relativeResource, $body = null)
     {
-        $request = $this->guzzle->createRequest($method, $this->expandurl($relativeResource));
-        $this->initRequest($request);
-
         if ($body) { // assert object/array
             if (version_compare(PHP_VERSION, '5.4.0', '>=')) {
                 $jsonString = json_encode($body, JSON_PRETTY_PRINT);
             } else {
                 $jsonString = json_encode($body);
             }
-
-            $request->setBody($jsonString);
         }
 
-        return $request;
-    }
+        $response = $this->guzzle->request($method, $this->expandurl($relativeResource), [
+            'auth' => [
+                $this->email,
+                $this->apiKey
+            ],
+            'body' => $jsonString
+        ]);
 
-    protected function initRequest(GuzzleRequest $request)
-    {
-        //s.th. like: $request->setAuth($this->apiKey, '');
+        return $response;
     }
 
     /**

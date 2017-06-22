@@ -4,7 +4,7 @@ namespace FastBill\Model;
 
 class Invoice extends AbstractModel
 {
-    protected static $xmlProperties = array(
+    protected static $xmlProperties = [
         'INVOICE_ID' => 'invoiceId',
         'TYPE' => 'type',
         'CUSTOMER_ID' => 'customerId',
@@ -47,8 +47,9 @@ class Invoice extends AbstractModel
 
         'SUB_TOTAL' => 'subTotal',
         'VAT_TOTAL' => 'vatTotal',
-        'TOTAL' => 'total'
-    );
+        'TOTAL' => 'total',
+        'EU_DELIVERY' => 'euDelivery',
+    ];
 
-    protected $collections = array('items' => 'FastBill\Model\InvoiceItem');
+    protected $collections = ['items' => 'FastBill\Model\InvoiceItem'];
 }
