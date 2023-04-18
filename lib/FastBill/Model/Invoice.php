@@ -32,6 +32,7 @@ class Invoice extends AbstractModel
         */
         'CURRENCY_CODE' => 'currencyCode',
         'TEMPLATE_ID' => 'templateId',
+        'TEMPLATE_HASH' => 'templateHash',
         'INVOICE_NUMBER' => 'invoiceNumber',
         'INVOICE_TITLE' => 'title',
         'INTROTEXT' => 'introtext',
