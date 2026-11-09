@@ -22,7 +22,7 @@
   },
   "require": {
     "beberlei/assert": "^2.7",
-    "guzzlehttp/guzzle": "^6.2"
+    "guzzlehttp/guzzle": "^7.15"
   },
   "require-dev": {
   },
